@@ -4,23 +4,31 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
@@ -51,7 +59,10 @@ public class PublicChannel extends AppCompatActivity{
     private Long recordCurrentTime;
     private ArrayList<String> inputAudioQueue;
 
+    private boolean recording = false;
+    private ImageView imgUserPic;
     private Socket mSocket;
+    private String thisUserPicUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +72,7 @@ public class PublicChannel extends AppCompatActivity{
         try {
             IO.Options opts = new IO.Options();
             opts.query = "name=" + getIntent().getStringExtra("NAME");
+            opts.query += "&picture=" + thisUserPicUrl;
             mSocket = IO.socket("https://juanwalkie.herokuapp.com", opts);
         } catch (URISyntaxException e) {
             Log.w("ERROR CONNECT SOCKET", "onCreate: mSocket", e);
@@ -162,16 +174,19 @@ public class PublicChannel extends AppCompatActivity{
                     public void run() {
                         JSONObject data = (JSONObject) args[0];
                         String user_name;
+                        String user_pic;
                         String audioBase64;
                         byte[] decodedBytes;
                         try {
                             audioBase64 = data.getString("audio");
                             Log.i("NEW_AUDIO", audioBase64);
                             user_name = data.getString("name");
+                            user_pic = data.getString("picture");
                             decodedBytes = Base64.decode(audioBase64, 0);
                             try {
                                 writeToFile(decodedBytes, mInputFile);
                                 text_log.setText(user_name + " is talking");
+                                setTalkerImg(user_pic);
                                 startPlaying(mInputFile, text_log);
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -186,15 +201,21 @@ public class PublicChannel extends AppCompatActivity{
         });
 
         setNotification();
+        thisUserPicUrl = getIntent().getStringExtra("PICTURE");
+        viewInjection();
     }
 
-    private void startRecording() {
+    private void viewInjection(){
+        imgUserPic = findViewById(R.id.imgUserPic);
+    }
+
+    private void startRecording(){
+        setTalkerImg(thisUserPicUrl);
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         mRecorder.setOutputFile(mOutputFile);
         mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-
         try {
             mRecorder.prepare();
         } catch (IOException e) {
@@ -205,6 +226,7 @@ public class PublicChannel extends AppCompatActivity{
     }
 
     private void stopRecording() {
+        imgUserPic.setVisibility(View.INVISIBLE);
         mRecorder.stop();
         mRecorder.release();
         mRecorder = null;
@@ -231,6 +253,7 @@ public class PublicChannel extends AppCompatActivity{
                 text_log.setText("Hold down to talk");
                 mPlayer.release();
                 mPlayer = null;
+                imgUserPic.setVisibility(View.INVISIBLE);
             }
         });
     }
@@ -278,6 +301,25 @@ public class PublicChannel extends AppCompatActivity{
         super.onDestroy();
         notificationManager.cancel(notificationID);
         mSocket.disconnect();
+    }
+
+    private void setTalkerImg(String url){
+        Picasso.with(this).load(url)
+                .into(imgUserPic, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        Bitmap imageBitmap = ((BitmapDrawable) imgUserPic.getDrawable()).getBitmap();
+                        RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(getResources(), imageBitmap);
+                        imageDrawable.setCircular(true);
+                        imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
+                        imgUserPic.setImageDrawable(imageDrawable);
+                        imgUserPic.setVisibility(View.VISIBLE);
+                    }
+                    @Override
+                    public void onError() {
+                        imgUserPic.setVisibility(View.INVISIBLE);
+                    }
+                });
     }
 
     /*
