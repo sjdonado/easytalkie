@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateUI(GoogleSignInAccount account){
         if(account != null){
-            Intent intent = new Intent(getBaseContext(), PublicRoom.class);
+            Intent intent = new Intent(getBaseContext(), PublicChannel.class);
             intent.putExtra("ID", account.getId());
             intent.putExtra("NAME", account.getDisplayName());
             startActivity(intent);

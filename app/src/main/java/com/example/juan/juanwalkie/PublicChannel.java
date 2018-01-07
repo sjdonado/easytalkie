@@ -16,7 +16,6 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.github.nkzawa.emitter.Emitter;
@@ -31,27 +30,33 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Date;
 
-public class PublicRoom extends AppCompatActivity{
+public class PublicChannel extends AppCompatActivity{
+
+    private final int notificationID = 555;
 
     private MediaPlayer mPlayer;
     private MediaPlayer beep_sound;
-    private MediaPlayer start_recording;
+    private MediaPlayer stop_recording;
     private MediaPlayer error_sound;
     private MediaRecorder mRecorder;
-    private String mFileName;
+    private String mInputFile;
+    private String mOutputFile;
     private TextView text_status;
     private GradientDrawable color_status;
     private NotificationManager notificationManager;
     private Vibrator vibrator;
-    private boolean recording = false;
+    private Long recordCurrentTime;
+    private ArrayList<String> inputAudioQueue;
 
     private Socket mSocket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_public_room);
+        setContentView(R.layout.activity_public_channel);
 
         try {
             IO.Options opts = new IO.Options();
@@ -61,19 +66,20 @@ public class PublicRoom extends AppCompatActivity{
             Log.w("ERROR CONNECT SOCKET", "onCreate: mSocket", e);
         }
 
-        setTitle("Public room");
+        setTitle("Public channel");
 
         mSocket.connect();
 
         beep_sound = MediaPlayer.create(this, R.raw.radio_beep);
-        start_recording = MediaPlayer.create(this, R.raw.start_recording);
+        stop_recording = MediaPlayer.create(this, R.raw.stop_recording);
         error_sound = MediaPlayer.create(this, R.raw.error_sound);
 
-        mFileName = getCacheDir().getAbsolutePath();
-        mFileName += "/juanwalkie.3gp";
+        mInputFile = getCacheDir().getAbsolutePath() + "/input.3gp";
+        mOutputFile = getCacheDir().getAbsolutePath() + "/output.3gp";
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        inputAudioQueue = new ArrayList();
 
         text_status = findViewById(R.id.text_status);
         final TextView text_users = findViewById(R.id.text_users);
@@ -93,10 +99,17 @@ public class PublicRoom extends AppCompatActivity{
                         bgShape.setColor(getResources().getColor(R.color.colorRecord));
                         vibrator.vibrate(50);
                         startRecording();
+                        recordCurrentTime = new Date().getTime();
                         return true;
                     case MotionEvent.ACTION_UP:
-                        stopRecording();
-                        sendAudio();
+                        if(new Date().getTime() - recordCurrentTime >= 1000){
+                            stopRecording();
+                            sendAudio();
+                        }else{
+                            mRecorder.release();
+                            mRecorder = null;
+                        }
+                        stop_recording.start();
                         bgShape.setColor(getResources().getColor(R.color.colorPrimary));
                         vibrator.vibrate(50);
                         return true;
@@ -157,9 +170,9 @@ public class PublicRoom extends AppCompatActivity{
                             user_name = data.getString("name");
                             decodedBytes = Base64.decode(audioBase64, 0);
                             try {
-                                writeToFile(decodedBytes, mFileName);
+                                writeToFile(decodedBytes, mInputFile);
                                 text_log.setText(user_name + " is talking");
-                                startPlaying(mFileName, text_log);
+                                startPlaying(mInputFile, text_log);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -176,11 +189,10 @@ public class PublicRoom extends AppCompatActivity{
     }
 
     private void startRecording() {
-        start_recording.start();
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        mRecorder.setOutputFile(mFileName);
+        mRecorder.setOutputFile(mOutputFile);
         mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
         try {
@@ -189,13 +201,7 @@ public class PublicRoom extends AppCompatActivity{
             Log.e("Media recoder", "prepare() failed");
         }
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run(){
-                mRecorder.start();
-            }
-        }, 4 * 100);
-
+        mRecorder.start();
     }
 
     private void stopRecording() {
@@ -210,25 +216,27 @@ public class PublicRoom extends AppCompatActivity{
         try {
             mPlayer.setDataSource(mFileName);
             mPlayer.prepare();
-            mPlayer.setVolume(100, 100);
+//            mPlayer.setVolume(100, 100);
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run(){
                     mPlayer.start();
                 }
-            }, 8 * 100);
+            }, 800);
         } catch (IOException e) {
             Log.e("PLAYING RECORD", "prepare() failed");
         }
         mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             public void onCompletion(MediaPlayer mp) {
                 text_log.setText("Hold down to talk");
+                mPlayer.release();
+                mPlayer = null;
             }
         });
     }
 
     private void sendAudio (){
-        File file = new File(mFileName);
+        File file = new File(mOutputFile);
         try {
             byte[] FileBytes = FileUtils.readFileToByteArray(file);
             byte[] encodedBytes = Base64.encode(FileBytes, 0);
@@ -252,7 +260,7 @@ public class PublicRoom extends AppCompatActivity{
     }
 
     private void setNotification(){
-        Intent resultIntent = new Intent(this, PublicRoom.class);
+        Intent resultIntent = new Intent(this, PublicChannel.class);
 
         PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
         NotificationCompat.Builder mBuilder =
@@ -262,13 +270,13 @@ public class PublicRoom extends AppCompatActivity{
                         .setContentText("Tap to more options.")
                         .setOngoing(true)
                         .setContentIntent(resultPendingIntent);
-        notificationManager.notify(001, mBuilder.build());
+        notificationManager.notify(notificationID, mBuilder.build());
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        notificationManager.cancel(001);
+        notificationManager.cancel(notificationID);
         mSocket.disconnect();
     }
 
