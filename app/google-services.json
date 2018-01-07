@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "695297879400",
+    "firebase_url": "https://juanwalkie-190818.firebaseio.com",
+    "project_id": "juanwalkie-190818",
+    "storage_bucket": "juanwalkie-190818.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:695297879400:android:36148e7da35e587f",
+        "android_client_info": {
+          "package_name": "com.example.juan.juanwalkie"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "695297879400-uaefqir4en3m4bd1enkun3kklni85ho4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.juan.juanwalkie",
+            "certificate_hash": "8b7c6a9e58eb1dac1b15e53c031b234ce9a23d95"
+          }
+        },
+        {
+          "client_id": "695297879400-7bmler8ssr8ubs2qc0hbk8vv7he4ten0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.juan.juanwalkie",
+            "certificate_hash": "5ef35d88412b0e6473d798944d519ab3d5cf7d73"
+          }
+        },
+        {
+          "client_id": "695297879400-o8hcj1k3dnpjo9mm2todbdbr65kudn3n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8hwAMFLN5Kk7JXrkI-rMhzsfIbQa8aJs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "695297879400-o8hcj1k3dnpjo9mm2todbdbr65kudn3n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
