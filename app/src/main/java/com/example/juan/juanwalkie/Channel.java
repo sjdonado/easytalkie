@@ -27,7 +27,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -44,14 +43,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class PublicChannel extends AppCompatActivity{
+public class Channel extends AppCompatActivity{
 
     private static final String publicChannelId = "jja296y2ewd949ld803qvwqblm4y46t5s";
     private static final String publicChannelName = "Public channel";
@@ -361,7 +359,7 @@ public class PublicChannel extends AppCompatActivity{
     }
 
     private void setNotification(){
-        Intent resultIntent = new Intent(this, PublicChannel.class);
+        Intent resultIntent = new Intent(this, Channel.class);
 
         PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
         NotificationCompat.Builder mBuilder =
@@ -448,7 +446,6 @@ public class PublicChannel extends AppCompatActivity{
 
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                mSocket.disconnect();
                 returnMainActivity();
             }
         });

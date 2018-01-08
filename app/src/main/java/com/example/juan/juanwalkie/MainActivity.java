@@ -1,22 +1,13 @@
 package com.example.juan.juanwalkie;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.text.InputType;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -95,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateUI(GoogleSignInAccount account){
         if(account != null){
-            Intent intent = new Intent(getBaseContext(), PublicChannel.class);
+            Intent intent = new Intent(getBaseContext(), Channel.class);
             intent.putExtra("ID", account.getId());
             intent.putExtra("NAME", account.getDisplayName());
             intent.putExtra("PICTURE", account.getPhotoUrl().toString().replace("96","140"));
