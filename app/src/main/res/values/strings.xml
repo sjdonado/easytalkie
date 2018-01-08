@@ -3,12 +3,56 @@
     <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Settings -->
+    <string name="action_settings">Settings</string>
+    <string name="sign_off_action_text">Sign Off</string>
+    <string name="add_channel_action_text">Add Channel</string>
+    <string name="change_channel_action_text">Change Channel</string>
+    <string name="about_us_action_text">About us</string>
+    <string name="dialog_signoff_title">Sign off</string>
+    <string name="dialog_signoff_description">Are you sure?</string>
+    <string name="dialog_addchannel_title">Add a channel</string>
+    <string name="dialog_addchannel_description">Place the channel\'s name</string>
+    <string name="dialog_changechannel_title">Change channel</string>
+    <string name="dialog_changechannel_description">Place the channel\'s id</string>
 
-    <!-- Example General settings -->
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Strings public channel -->
+    <string name="has_joined">has joined</string>
+    <string name="has_left">has left</string>
+    <string name="connected_users">Connected users:</string>
+    <string name="online">Online</string>
+    <string name="hold_down_to_talk">Hold down to talk</string>
+    <string name="you_are_talking">You\'re talking</string>
+    <string name="is_talking">is talking</string>
+    <string name="you_are_online">, you\'re online</string>
+    <string name="tap_to_more_options">Tap to more options.</string>
+
     <string name="pref_header_general">General</string>
+
+    <string name="pref_title_social_recommendations">Enable social recommendations</string>
+    <string name="pref_description_social_recommendations">Recommendations for people to contact
+        based on your message history
+    </string>
 
     <string name="pref_title_display_name">Display name</string>
     <string name="pref_default_display_name">John Smith</string>
+
+    <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
+    <string-array name="pref_example_list_titles">
+        <item>Always</item>
+        <item>When possible</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_example_list_values">
+        <item>1</item>
+        <item>0</item>
+        <item>-1</item>
+    </string-array>
+
+    <!-- Example settings for Data & Sync -->
+    <string name="pref_header_data_sync">Data &amp; sync</string>
 
     <string name="pref_title_sync_frequency">Sync frequency</string>
     <string-array name="pref_sync_frequency_titles">
@@ -20,15 +64,38 @@
         <item>Never</item>
     </string-array>
 
-    <!-- Strings public channel -->
+    <string-array name="pref_sync_frequency_values">
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>180</item>
+        <item>360</item>
+        <item>-1</item>
+    </string-array>
 
-    <string name="has_joined">has joined</string>
-    <string name="has_left">has left</string>
-    <string name="connected_users">Connected users:</string>
-    <string name="online">Online</string>
-    <string name="hold_down_to_talk">Hold down to talk</string>
-    <string name="you_are_talking">You\'re talking</string>
-    <string name="is_talking">is talking</string>
-    <string name="you_are_online">, you\'re online</string>
-    <string name="tap_to_more_options">Tap to more options.</string>
+    <string-array name="list_preference_entries">
+        <item>Entry 1</item>
+        <item>Entry 2</item>
+        <item>Entry 3</item>
+    </string-array>
+
+    <string-array name="list_preference_entry_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="multi_select_list_preference_default_value" />
+
+    <string name="pref_title_system_sync_settings">System sync settings</string>
+
+    <!-- Example settings for Notifications -->
+    <string name="pref_header_notifications">Notifications</string>
+
+    <string name="pref_title_new_message_notifications">New message notifications</string>
+
+    <string name="pref_title_ringtone">Ringtone</string>
+    <string name="pref_ringtone_silent">Silent</string>
+
+    <string name="pref_title_vibrate">Vibrate</string>
 </resources>
