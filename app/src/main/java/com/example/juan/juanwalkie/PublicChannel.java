@@ -62,7 +62,6 @@ public class PublicChannel extends AppCompatActivity{
     private boolean recording = false;
     private ImageView imgUserPic;
     private Socket mSocket;
-    private String thisUserPicUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,8 +71,8 @@ public class PublicChannel extends AppCompatActivity{
         try {
             IO.Options opts = new IO.Options();
             opts.query = "name=" + getIntent().getStringExtra("NAME");
-            opts.query += "&picture=" + thisUserPicUrl;
-            mSocket = IO.socket("https://juanwalkie.herokuapp.com", opts);
+            opts.query += "&picture=" + getIntent().getStringExtra("PICTURE");
+            mSocket = IO.socket("http://192.168.1.15:3000", opts);
         } catch (URISyntaxException e) {
             Log.w("ERROR CONNECT SOCKET", "onCreate: mSocket", e);
         }
@@ -122,6 +121,7 @@ public class PublicChannel extends AppCompatActivity{
                             mRecorder = null;
                         }
                         stop_recording.start();
+                        imgUserPic.setVisibility(View.INVISIBLE);
                         bgShape.setColor(getResources().getColor(R.color.colorPrimary));
                         vibrator.vibrate(50);
                         return true;
@@ -139,7 +139,7 @@ public class PublicChannel extends AppCompatActivity{
             }
         });
 
-        mSocket.on("USERS", new Emitter.Listener() {
+        mSocket.on("GET_CHANNEL", new Emitter.Listener() {
             @Override
             public void call(final Object... args) {
                 runOnUiThread(new Runnable() {
@@ -201,7 +201,6 @@ public class PublicChannel extends AppCompatActivity{
         });
 
         setNotification();
-        thisUserPicUrl = getIntent().getStringExtra("PICTURE");
         viewInjection();
     }
 
@@ -210,7 +209,7 @@ public class PublicChannel extends AppCompatActivity{
     }
 
     private void startRecording(){
-        setTalkerImg(thisUserPicUrl);
+        setTalkerImg(getIntent().getStringExtra("PICTURE"));
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -226,7 +225,6 @@ public class PublicChannel extends AppCompatActivity{
     }
 
     private void stopRecording() {
-        imgUserPic.setVisibility(View.INVISIBLE);
         mRecorder.stop();
         mRecorder.release();
         mRecorder = null;
