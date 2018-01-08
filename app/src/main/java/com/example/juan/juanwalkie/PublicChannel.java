@@ -44,7 +44,7 @@ import java.util.Date;
 
 public class PublicChannel extends AppCompatActivity{
 
-    private final int notificationID = 5055;
+    private final int notificationID = 5;
     private String userChannelId;
 
     private MediaPlayer mPlayer;
@@ -223,8 +223,10 @@ public class PublicChannel extends AppCompatActivity{
     }
 
     private void startRecording(TextView text_log){
-        setTalkerImg(getIntent().getStringExtra("PICTURE"));
-        text_log.setText("You're talking");
+        if(mPlayer == null || !mPlayer.isPlaying()){
+            setTalkerImg(getIntent().getStringExtra("PICTURE"));
+            text_log.setText("You're talking");
+        }
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -240,6 +242,10 @@ public class PublicChannel extends AppCompatActivity{
     }
 
     private void stopRecording() {
+        if(mPlayer == null || !mPlayer.isPlaying()){
+            text_log.setText("Hold down to talk");
+            imgUserPic.setVisibility(View.INVISIBLE);
+        }
         mRecorder.stop();
         mRecorder.release();
         mRecorder = null;
@@ -287,10 +293,12 @@ public class PublicChannel extends AppCompatActivity{
             }
             mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 public void onCompletion(MediaPlayer mp) {
-                    text_log.setText("Hold down to talk");
+                    if(mRecorder == null){
+                        text_log.setText("Hold down to talk");
+                        imgUserPic.setVisibility(View.INVISIBLE);
+                    }
                     mPlayer.release();
                     mPlayer = null;
-                    imgUserPic.setVisibility(View.INVISIBLE);
                     if(!inputAudioQueue.isEmpty()){
                         InputFile inputFile = inputAudioQueue.get(0);
                         startPlaying(inputFile.audioBase64, inputFile.text_log, inputFile.user_pic, inputFile.user_name);
@@ -328,10 +336,14 @@ public class PublicChannel extends AppCompatActivity{
     }
 
     private void returnMainActivity(){
-        mSocket.disconnect();
+        disconnect();
         MainActivity.signOut();
-        Intent intent = new Intent(getBaseContext(), MainActivity.class);
-        startActivity(intent);
+        finish();
+    }
+
+    private void disconnect(){
+        mSocket.disconnect();
+        notificationManager.cancel(notificationID);
     }
 
     private void setNotification(){
@@ -370,8 +382,7 @@ public class PublicChannel extends AppCompatActivity{
     @Override
     public void onDestroy() {
         super.onDestroy();
-        notificationManager.cancel(notificationID);
-        mSocket.disconnect();
+        disconnect();
     }
 
     /*
