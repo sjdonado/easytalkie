@@ -77,18 +77,7 @@ public class PublicChannel extends AppCompatActivity{
         userChannelId = "jja296y2ewd949ld803qvwqblm4y46t5s";
         setTitle("Public channel");
 
-        try {
-            IO.Options opts = new IO.Options();
-            opts.query = "name=" + getIntent().getStringExtra("NAME");
-            opts.query += "&picture=" + getIntent().getStringExtra("PICTURE");
-            opts.query += "&id=" + getIntent().getStringExtra("ID");
-            opts.query += "&channelId=" + userChannelId;
-            mSocket = IO.socket("https://juanwalkie.herokuapp.com", opts);
-        } catch (URISyntaxException e) {
-            Log.w("ERROR CONNECT SOCKET", "onCreate: mSocket", e);
-        }
-
-        mSocket.connect();
+        connect();
 
         beep_sound = MediaPlayer.create(this, R.raw.radio_beep);
         stop_recording = MediaPlayer.create(this, R.raw.stop_recording);
@@ -134,14 +123,6 @@ public class PublicChannel extends AppCompatActivity{
             }
         });
 
-        findViewById(R.id.sign_out).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mSocket.disconnect();
-                returnMainActivity();
-            }
-        });
-
         mSocket.on("USERS", new Emitter.Listener() {
             @Override
             public void call(final Object... args) {
@@ -152,17 +133,23 @@ public class PublicChannel extends AppCompatActivity{
                         String total_users;
                         String new_user;
                         String channelId;
+                        String action;
                         try {
                             total_users = data.getString("total_users");
                             new_user = data.getString("new_user");
                             channelId = data.getString("channelId");
+                            action = data.getString("action");
                         } catch (JSONException e) {
                             return;
                         }
                         if(channelId.equals(userChannelId)){
-                            Log.i("TOTAL_USERS", total_users + "");
+                            Log.i("CHANNEL", channelId);
+                            if(action.equals("connection")){
+                                text_log.setText(new_user + " has joined");
+                            }else{
+                                text_log.setText(new_user + " has left");
+                            }
                             text_users.setText("Connected users: " + total_users);
-                            if(!new_user.equals("nil")) text_log.setText(new_user + " has joined");
                             text_status.setText("Online");
                             color_status.setColor(getResources().getColor(R.color.online));
                         }
@@ -211,6 +198,28 @@ public class PublicChannel extends AppCompatActivity{
 
         color_status.setColor(getResources().getColor(R.color.offline));
 
+        findViewById(R.id.sign_out).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                returnMainActivity();
+            }
+        });
+
+    }
+
+    private void connect(){
+        try {
+            IO.Options opts = new IO.Options();
+            opts.query = "name=" + getIntent().getStringExtra("NAME");
+            opts.query += "&picture=" + getIntent().getStringExtra("PICTURE");
+            opts.query += "&id=" + getIntent().getStringExtra("ID");
+            opts.query += "&channelId=" + userChannelId;
+            mSocket = IO.socket("https://juanwalkie.herokuapp.com", opts);
+        } catch (URISyntaxException e) {
+            Log.w("ERROR CONNECT SOCKET", "onCreate: mSocket", e);
+        }
+
+        mSocket.connect();
     }
 
     private void startRecording(TextView text_log){
@@ -278,7 +287,7 @@ public class PublicChannel extends AppCompatActivity{
             }
             mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 public void onCompletion(MediaPlayer mp) {
-                    text_log.setText("Hold down to talk");
+                    text_log.setText("Tap to talk");
                     mPlayer.release();
                     mPlayer = null;
                     imgUserPic.setVisibility(View.INVISIBLE);
@@ -319,6 +328,7 @@ public class PublicChannel extends AppCompatActivity{
     }
 
     private void returnMainActivity(){
+        mSocket.disconnect();
         MainActivity.signOut();
         Intent intent = new Intent(getBaseContext(), MainActivity.class);
         startActivity(intent);
