@@ -97,6 +97,12 @@ public class PublicChannel extends AppCompatActivity{
 
         connect();
 
+        toolbar = findViewById(R.id.toolBar);
+        //setSupportActionBar(toolbar);
+        addChannelInput = new EditText(this);
+        chChannelInput = new EditText(this);
+        setModals();
+
         beep_sound = MediaPlayer.create(this, R.raw.radio_beep);
         stop_recording = MediaPlayer.create(this, R.raw.stop_recording);
         error_sound = MediaPlayer.create(this, R.raw.error_sound);
