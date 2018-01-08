@@ -3,6 +3,7 @@ package com.example.juan.juanwalkie;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -14,15 +15,23 @@ import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
@@ -65,6 +74,13 @@ public class PublicChannel extends AppCompatActivity{
     private Vibrator vibrator;
     private Long recordCurrentTime;
     private ArrayList<InputFile> inputAudioQueue;
+    private Toolbar toolbar;
+    private AlertDialog signOffDialog;
+    private AlertDialog addChannelDialog;
+    private AlertDialog changeChannelDialog;
+    private AlertDialog.Builder builder;
+    private EditText addChannelInput;
+    private EditText chChannelInput;
 
     private ImageView imgUserPic;
     private Socket mSocket;
@@ -76,6 +92,13 @@ public class PublicChannel extends AppCompatActivity{
 
         userChannelId = "jja296y2ewd949ld803qvwqblm4y46t5s";
         setTitle("Public channel");
+
+        toolbar = findViewById(R.id.toolBar);
+        setSupportActionBar(toolbar);
+
+        addChannelInput = new EditText(this);
+        chChannelInput = new EditText(this);
+        setModals();
 
         try {
             IO.Options opts = new IO.Options();
@@ -131,14 +154,6 @@ public class PublicChannel extends AppCompatActivity{
                     default:
                         return false;
                 }
-            }
-        });
-
-        findViewById(R.id.sign_out).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mSocket.disconnect();
-                returnMainActivity();
             }
         });
 
@@ -362,6 +377,131 @@ public class PublicChannel extends AppCompatActivity{
         super.onDestroy();
         notificationManager.cancel(notificationID);
         mSocket.disconnect();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.sign_off_action:
+                signOffDialog.show();
+                return true;
+
+            case R.id.add_channel_action:
+                addChannelInput.setText("");
+                addChannelDialog.show();
+                return true;
+
+            case R.id.change_channel_action:
+                chChannelInput.setText("");
+                changeChannelDialog.show();
+                return true;
+
+            case R.id.about_us_action:
+                Log.i("A","about us");
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void setModals(){
+        createSignOffModal();
+        createAddChannelModal();
+        createChangeChannelModal();
+    }
+
+    private void createSignOffModal(){
+        builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.dialog_signoff_description)
+                .setTitle(R.string.dialog_signoff_title);
+
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                mSocket.disconnect();
+                returnMainActivity();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+            }
+        });
+
+        signOffDialog = builder.create();
+    }
+
+    private void createAddChannelModal(){
+        builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.dialog_addchannel_description)
+                .setTitle(R.string.dialog_addchannel_title);
+
+        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+        addChannelInput.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(addChannelInput);
+
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                String channelName = addChannelInput.getText().toString();
+                Log.i("addc",channelName);
+                if(!channelName.isEmpty()){
+
+                }else{
+                    Toast.makeText(getApplicationContext(), "You need to set a name",Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+
+            }
+        });
+
+        addChannelDialog = builder.create();
+    }
+
+    private void createChangeChannelModal(){
+        builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.dialog_changechannel_description)
+                .setTitle(R.string.dialog_changechannel_title);
+
+        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+        chChannelInput.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(chChannelInput);
+
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                String channelToken = chChannelInput.getText().toString();
+                Log.i("addc",channelToken);
+                if(!channelToken.isEmpty()){
+
+                    //handle the operation with API, BROKO
+
+                }else{
+                    Toast.makeText(getApplicationContext(), "You need to set the channel's id",Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+
+            }
+        });
+
+        changeChannelDialog = builder.create();
     }
 
     /*
