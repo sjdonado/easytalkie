@@ -35,6 +35,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -43,7 +44,8 @@ import java.util.Date;
 
 public class PublicChannel extends AppCompatActivity{
 
-    private final int notificationID = 555;
+    private final int notificationID = 5055;
+    private String userChannelId;
 
     private MediaPlayer mPlayer;
     private MediaPlayer beep_sound;
@@ -53,13 +55,17 @@ public class PublicChannel extends AppCompatActivity{
     private String mInputFile;
     private String mOutputFile;
     private TextView text_status;
+    private TextView text_users;
+    private TextView text_log;
+    private View circle_status;
+    private View record_audio;
+    private GradientDrawable bgShape;
     private GradientDrawable color_status;
     private NotificationManager notificationManager;
     private Vibrator vibrator;
     private Long recordCurrentTime;
-    private ArrayList<String> inputAudioQueue;
+    private ArrayList<InputFile> inputAudioQueue;
 
-    private boolean recording = false;
     private ImageView imgUserPic;
     private Socket mSocket;
 
@@ -68,16 +74,19 @@ public class PublicChannel extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_public_channel);
 
+        userChannelId = "jja296y2ewd949ld803qvwqblm4y46t5s";
+        setTitle("Public channel");
+
         try {
             IO.Options opts = new IO.Options();
             opts.query = "name=" + getIntent().getStringExtra("NAME");
             opts.query += "&picture=" + getIntent().getStringExtra("PICTURE");
-            mSocket = IO.socket("http://192.168.1.15:3000", opts);
+            opts.query += "&id=" + getIntent().getStringExtra("ID");
+            opts.query += "&channelId=" + userChannelId;
+            mSocket = IO.socket("https://juanwalkie.herokuapp.com", opts);
         } catch (URISyntaxException e) {
             Log.w("ERROR CONNECT SOCKET", "onCreate: mSocket", e);
         }
-
-        setTitle("Public channel");
 
         mSocket.connect();
 
@@ -92,15 +101,8 @@ public class PublicChannel extends AppCompatActivity{
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         inputAudioQueue = new ArrayList();
 
-        text_status = findViewById(R.id.text_status);
-        final TextView text_users = findViewById(R.id.text_users);
-        final TextView text_log = findViewById(R.id.text_log);
-
-        View circle_status = findViewById(R.id.circle_status);
-        color_status = (GradientDrawable)circle_status.getBackground();
-
-        View record_audio = findViewById(R.id.record_audio);
-        final GradientDrawable bgShape = (GradientDrawable)record_audio.getBackground();
+        viewInjection();
+        setNotification();
 
         record_audio.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -109,7 +111,7 @@ public class PublicChannel extends AppCompatActivity{
                     case MotionEvent.ACTION_DOWN:
                         bgShape.setColor(getResources().getColor(R.color.colorRecord));
                         vibrator.vibrate(50);
-                        startRecording();
+                        startRecording(text_log);
                         recordCurrentTime = new Date().getTime();
                         return true;
                     case MotionEvent.ACTION_UP:
@@ -123,6 +125,7 @@ public class PublicChannel extends AppCompatActivity{
                         stop_recording.start();
                         imgUserPic.setVisibility(View.INVISIBLE);
                         bgShape.setColor(getResources().getColor(R.color.colorPrimary));
+                        text_log.setText("Hold down to talk");
                         vibrator.vibrate(50);
                         return true;
                     default:
@@ -139,7 +142,7 @@ public class PublicChannel extends AppCompatActivity{
             }
         });
 
-        mSocket.on("GET_CHANNEL", new Emitter.Listener() {
+        mSocket.on("USERS", new Emitter.Listener() {
             @Override
             public void call(final Object... args) {
                 runOnUiThread(new Runnable() {
@@ -148,23 +151,25 @@ public class PublicChannel extends AppCompatActivity{
                         JSONObject data = (JSONObject) args[0];
                         String total_users;
                         String new_user;
+                        String channelId;
                         try {
                             total_users = data.getString("total_users");
                             new_user = data.getString("new_user");
+                            channelId = data.getString("channelId");
                         } catch (JSONException e) {
                             return;
                         }
-                        Log.i("TOTAL_USERS", total_users + "");
-                        text_users.setText("Connected users: " + total_users);
-                        if(!new_user.equals("nil")) text_log.setText(new_user + " is joined");
-                        text_status.setText("Online");
-                        color_status.setColor(getResources().getColor(R.color.online));
+                        if(channelId.equals(userChannelId)){
+                            Log.i("TOTAL_USERS", total_users + "");
+                            text_users.setText("Connected users: " + total_users);
+                            if(!new_user.equals("nil")) text_log.setText(new_user + " has joined");
+                            text_status.setText("Online");
+                            color_status.setColor(getResources().getColor(R.color.online));
+                        }
                     }
                 });
             }
         });
-
-        color_status.setColor(getResources().getColor(R.color.offline));
 
         mSocket.on("NEW_AUDIO", new Emitter.Listener() {
             @Override
@@ -176,21 +181,12 @@ public class PublicChannel extends AppCompatActivity{
                         String user_name;
                         String user_pic;
                         String audioBase64;
-                        byte[] decodedBytes;
                         try {
                             audioBase64 = data.getString("audio");
                             Log.i("NEW_AUDIO", audioBase64);
                             user_name = data.getString("name");
                             user_pic = data.getString("picture");
-                            decodedBytes = Base64.decode(audioBase64, 0);
-                            try {
-                                writeToFile(decodedBytes, mInputFile);
-                                text_log.setText(user_name + " is talking");
-                                setTalkerImg(user_pic);
-                                startPlaying(mInputFile, text_log);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                            startPlaying(audioBase64, text_log, user_pic, user_name);
                         } catch (JSONException e) {
                             Log.w("ERROR", "run: getAUDIO", e);
                             return;
@@ -199,17 +195,27 @@ public class PublicChannel extends AppCompatActivity{
                 });
             }
         });
-
-        setNotification();
-        viewInjection();
     }
 
     private void viewInjection(){
         imgUserPic = findViewById(R.id.imgUserPic);
+        text_status = findViewById(R.id.text_status);
+        text_users = findViewById(R.id.text_users);
+        text_log = findViewById(R.id.text_log);
+
+        circle_status = findViewById(R.id.circle_status);
+        color_status = (GradientDrawable)circle_status.getBackground();
+
+        record_audio = findViewById(R.id.record_audio);
+        bgShape = (GradientDrawable)record_audio.getBackground();
+
+        color_status.setColor(getResources().getColor(R.color.offline));
+
     }
 
-    private void startRecording(){
+    private void startRecording(TextView text_log){
         setTalkerImg(getIntent().getStringExtra("PICTURE"));
+        text_log.setText("You're talking");
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -230,30 +236,60 @@ public class PublicChannel extends AppCompatActivity{
         mRecorder = null;
     }
 
-    private void startPlaying(String mFileName, final TextView text_log) {
-        beep_sound.start();
-        mPlayer = new MediaPlayer();
-        try {
-            mPlayer.setDataSource(mFileName);
-            mPlayer.prepare();
-//            mPlayer.setVolume(100, 100);
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run(){
-                    mPlayer.start();
-                }
-            }, 800);
-        } catch (IOException e) {
-            Log.e("PLAYING RECORD", "prepare() failed");
+    private class InputFile {
+        public String audioBase64;
+        public TextView text_log;
+        public String user_pic;
+        public String user_name;
+
+        public InputFile(String audioBase64, TextView text_log, String user_pic, String user_name){
+            this.audioBase64 = audioBase64;
+            this.text_log = text_log;
+            this.user_pic = user_pic;
+            this.user_name = user_name;
         }
-        mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            public void onCompletion(MediaPlayer mp) {
-                text_log.setText("Hold down to talk");
-                mPlayer.release();
-                mPlayer = null;
-                imgUserPic.setVisibility(View.INVISIBLE);
+    }
+
+    private void initStartPlaying(String audioBase64, TextView text_log, String user_pic, String user_name){
+        writeToFile(audioBase64, mInputFile);
+        text_log.setText(user_name + " is talking");
+        setTalkerImg(user_pic);
+    }
+
+    private void startPlaying(String audioBase64, final TextView text_log, String user_pic, String user_name) {
+        if(mPlayer != null && mPlayer.isPlaying()){
+            inputAudioQueue.add(new InputFile(audioBase64, text_log, user_pic, user_name));
+        }else{
+            initStartPlaying(audioBase64, text_log, user_pic, user_name);
+            beep_sound.start();
+            mPlayer = new MediaPlayer();
+            try {
+                mPlayer.setDataSource(mInputFile);
+                mPlayer.prepare();
+//            mPlayer.setVolume(100, 100);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run(){
+                        mPlayer.start();
+                    }
+                }, 800);
+            } catch (IOException e) {
+                Log.e("PLAYING RECORD", "prepare() failed");
             }
-        });
+            mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                public void onCompletion(MediaPlayer mp) {
+                    text_log.setText("Hold down to talk");
+                    mPlayer.release();
+                    mPlayer = null;
+                    imgUserPic.setVisibility(View.INVISIBLE);
+                    if(!inputAudioQueue.isEmpty()){
+                        InputFile inputFile = inputAudioQueue.get(0);
+                        startPlaying(inputFile.audioBase64, inputFile.text_log, inputFile.user_pic, inputFile.user_name);
+                        inputAudioQueue.remove(inputFile);
+                    }
+                }
+            });
+        }
     }
 
     private void sendAudio (){
@@ -268,10 +304,18 @@ public class PublicChannel extends AppCompatActivity{
         }
     }
 
-    public void writeToFile(byte[] data, String fileName) throws IOException{
-        FileOutputStream out = new FileOutputStream(fileName);
-        out.write(data);
-        out.close();
+    public void writeToFile(String audioBase64, String fileName){
+        byte[] data = Base64.decode(audioBase64, 0);
+        FileOutputStream out;
+        try {
+            out = new FileOutputStream(fileName);
+            out.write(data);
+            out.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void returnMainActivity(){
@@ -294,13 +338,6 @@ public class PublicChannel extends AppCompatActivity{
         notificationManager.notify(notificationID, mBuilder.build());
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        notificationManager.cancel(notificationID);
-        mSocket.disconnect();
-    }
-
     private void setTalkerImg(String url){
         Picasso.with(this).load(url)
                 .into(imgUserPic, new Callback() {
@@ -318,6 +355,13 @@ public class PublicChannel extends AppCompatActivity{
                         imgUserPic.setVisibility(View.INVISIBLE);
                     }
                 });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        notificationManager.cancel(notificationID);
+        mSocket.disconnect();
     }
 
     /*
