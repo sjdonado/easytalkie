@@ -22,6 +22,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Base64;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -76,11 +77,9 @@ public class Channel extends AppCompatActivity{
     private ArrayList<InputFile> inputAudioQueue;
     private Toolbar toolbar;
     private AlertDialog signOffDialog;
-    private AlertDialog addChannelDialog;
-    private AlertDialog changeChannelDialog;
+    private AlertDialog joinChannelDialog;
     private AlertDialog.Builder builder;
-    private EditText addChannelInput;
-    private EditText chChannelInput;
+    private EditText joinChannelInput;
 
     private ImageView imgUserPic;
     private Socket mSocket;
@@ -97,8 +96,7 @@ public class Channel extends AppCompatActivity{
 
         toolbar = findViewById(R.id.toolBar);
         //setSupportActionBar(toolbar);
-        addChannelInput = new EditText(this);
-        chChannelInput = new EditText(this);
+        joinChannelInput = new EditText(this);
         setModals();
 
         beep_sound = MediaPlayer.create(this, R.raw.radio_beep);
@@ -412,14 +410,9 @@ public class Channel extends AppCompatActivity{
                 signOffDialog.show();
                 return true;
 
-            case R.id.add_channel_action:
-                addChannelInput.setText("");
-                addChannelDialog.show();
-                return true;
-
-            case R.id.change_channel_action:
-                chChannelInput.setText("");
-                changeChannelDialog.show();
+            case R.id.join_channel_action:
+                joinChannelInput.setText("");
+                joinChannelDialog.show();
                 return true;
 
             case R.id.about_us_action:
@@ -435,8 +428,7 @@ public class Channel extends AppCompatActivity{
 
     private void setModals(){
         createSignOffModal();
-        createAddChannelModal();
-        createChangeChannelModal();
+        createJoinChannelModal();
     }
 
     private void createSignOffModal(){
@@ -458,18 +450,19 @@ public class Channel extends AppCompatActivity{
         signOffDialog = builder.create();
     }
 
-    private void createAddChannelModal(){
+    private void createJoinChannelModal(){
         builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.dialog_addchannel_description)
-                .setTitle(R.string.dialog_addchannel_title);
+        builder.setTitle(R.string.dialog_joinchannel_title);
 
         // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-        addChannelInput.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(addChannelInput);
+        joinChannelInput.setInputType(InputType.TYPE_CLASS_TEXT);
+
+        LayoutInflater inflater = getLayoutInflater();
+        builder.setView(inflater.inflate(R.layout.joinchannel_layout, null));
 
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                String channelName = addChannelInput.getText().toString();
+                String channelName = joinChannelInput.getText().toString();
                 Log.i("addc",channelName);
                 if(!channelName.isEmpty()){
 
@@ -486,41 +479,9 @@ public class Channel extends AppCompatActivity{
             }
         });
 
-        addChannelDialog = builder.create();
+        joinChannelDialog = builder.create();
     }
 
-    private void createChangeChannelModal(){
-        builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.dialog_changechannel_description)
-                .setTitle(R.string.dialog_changechannel_title);
-
-        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-        chChannelInput.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(chChannelInput);
-
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                String channelToken = chChannelInput.getText().toString();
-                Log.i("addc",channelToken);
-                if(!channelToken.isEmpty()){
-
-                    //handle the operation with API, BROKO
-
-                }else{
-                    Toast.makeText(getApplicationContext(), "You need to set the channel's id",Toast.LENGTH_SHORT).show();
-                }
-
-            }
-        });
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // User cancelled the dialog
-
-            }
-        });
-
-        changeChannelDialog = builder.create();
-    }
 
     /*
     private void isConnect(){

@@ -5,16 +5,12 @@
     <!-- Strings related to ToolBar Menu -->
     <string name="action_settings">Settings</string>
     <string name="sign_off_action_text">Sign Off</string>
-    <string name="add_channel_action_text">Add Channel</string>
-    <string name="remove_channel_action_text">Remove Channel</string>
-    <string name="change_channel_action_text">Change Channel</string>
+    <string name="join_channel_action_text">Join Channel</string>
     <string name="about_us_action_text">Info</string>
     <string name="dialog_signoff_title">Sign off</string>
     <string name="dialog_signoff_description">Are you sure?</string>
-    <string name="dialog_addchannel_title">Add a channel</string>
-    <string name="dialog_addchannel_description">Place the channel\'s name</string>
-    <string name="dialog_changechannel_title">Change channel</string>
-    <string name="dialog_changechannel_description">Place the channel\'s id</string>
+    <string name="dialog_joinchannel_title">Add a channel</string>
+    <string name="dialog_joinchannel_hint">#example</string>
 
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
