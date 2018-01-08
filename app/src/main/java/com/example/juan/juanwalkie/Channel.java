@@ -12,6 +12,7 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
@@ -77,7 +78,7 @@ public class Channel extends AppCompatActivity{
     private AlertDialog signOffDialog;
     private AlertDialog joinChannelDialog;
     private AlertDialog.Builder builder;
-    private EditText joinChannelInput;
+    private TextInputEditText joinChannelInput;
 
     private ImageView imgUserPic;
     private Socket mSocket;
@@ -106,7 +107,6 @@ public class Channel extends AppCompatActivity{
     private void viewInjection(){
         toolbar = findViewById(R.id.toolBar);
         //setSupportActionBar(toolbar);
-        joinChannelInput = new EditText(this);
         setModals();
 
         imgUserPic = findViewById(R.id.imgUserPic);
@@ -384,7 +384,7 @@ public class Channel extends AppCompatActivity{
                 return true;
 
             case R.id.join_channel_action:
-                joinChannelInput.setText("");
+
                 joinChannelDialog.show();
                 return true;
 
@@ -427,11 +427,9 @@ public class Channel extends AppCompatActivity{
         builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.dialog_joinchannel_title);
 
-        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-        joinChannelInput.setInputType(InputType.TYPE_CLASS_TEXT);
-
         LayoutInflater inflater = getLayoutInflater();
         builder.setView(inflater.inflate(R.layout.joinchannel_layout, null));
+        joinChannelInput = findViewById(R.id.txtJoinChannel);
 
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
