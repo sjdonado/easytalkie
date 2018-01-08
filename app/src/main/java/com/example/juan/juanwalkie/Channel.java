@@ -12,6 +12,7 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
@@ -51,15 +52,13 @@ import java.util.Date;
 
 public class Channel extends AppCompatActivity{
 
-    private static final String publicChannelId = "jja296y2ewd949ld803qvwqblm4y46t5s";
-    private static final String publicChannelName = "Public channel";
-    private final int notificationID = 5;
-    private String userChannelId;
+    private final int notificationID = 05;
+    private static final String defaultChannel = "#PublicChannel";
 
     private MediaPlayer mPlayer;
     private MediaPlayer beep_sound;
     private MediaPlayer stop_recording;
-    private MediaPlayer error_sound;
+//    private MediaPlayer error_sound;
     private MediaRecorder mRecorder;
     private String mInputFile;
     private String mOutputFile;
@@ -90,20 +89,9 @@ public class Channel extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_public_channel);
 
-        userChannelId = publicChannelId;
-        setTitle(publicChannelName);
-
-        connect();
-
-        toolbar = findViewById(R.id.toolBar);
-        //setSupportActionBar(toolbar);
-        addChannelInput = new EditText(this);
-        chChannelInput = new EditText(this);
-        setModals();
-
         beep_sound = MediaPlayer.create(this, R.raw.radio_beep);
         stop_recording = MediaPlayer.create(this, R.raw.stop_recording);
-        error_sound = MediaPlayer.create(this, R.raw.error_sound);
+//        error_sound = MediaPlayer.create(this, R.raw.error_sound);
 
         mInputFile = getCacheDir().getAbsolutePath() + "/input.3gp";
         mOutputFile = getCacheDir().getAbsolutePath() + "/output.3gp";
@@ -113,7 +101,29 @@ public class Channel extends AppCompatActivity{
         inputAudioQueue = new ArrayList();
 
         viewInjection();
+        connect();
         setNotification();
+    }
+
+    private void viewInjection(){
+        toolbar = findViewById(R.id.toolBar);
+        //setSupportActionBar(toolbar);
+        addChannelInput = new EditText(this);
+        chChannelInput = new EditText(this);
+        setModals();
+
+        imgUserPic = findViewById(R.id.imgUserPic);
+        text_status = findViewById(R.id.text_status);
+        text_users = findViewById(R.id.text_users);
+        text_log = findViewById(R.id.text_log);
+
+        circle_status = findViewById(R.id.circle_status);
+        color_status = (GradientDrawable)circle_status.getBackground();
+
+        record_audio = findViewById(R.id.record_audio);
+        bgShape = (GradientDrawable)record_audio.getBackground();
+
+        color_status.setColor(getResources().getColor(R.color.offline));
 
         record_audio.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -129,11 +139,11 @@ public class Channel extends AppCompatActivity{
                         if(new Date().getTime() - recordCurrentTime >= 1000){
                             stopRecording();
                             sendAudio();
+                            stop_recording.start();
                         }else{
                             mRecorder.release();
                             mRecorder = null;
                         }
-                        stop_recording.start();
                         imgUserPic.setVisibility(View.INVISIBLE);
                         bgShape.setColor(getResources().getColor(R.color.colorPrimary));
                         text_log.setText(getResources().getString(R.string.hold_down_to_talk));
@@ -145,6 +155,24 @@ public class Channel extends AppCompatActivity{
             }
         });
 
+    }
+
+    private void connect(){
+        try {
+            IO.Options opts = new IO.Options();
+            opts.query = "name=" + getIntent().getStringExtra("NAME");
+            opts.query += "&picture=" + getIntent().getStringExtra("PICTURE");
+            opts.query += "&id=" + getIntent().getStringExtra("ID");
+            mSocket = IO.socket("http://192.168.1.18:3000", opts);
+        } catch (URISyntaxException e) {
+            Log.w("ERROR CONNECT SOCKET", "onCreate: mSocket", e);
+        }
+        mSocket.connect();
+        setSocketListeners();
+        setChannel(defaultChannel);
+    }
+
+    private void setSocketListeners(){
         mSocket.on("USERS", new Emitter.Listener() {
             @Override
             public void call(final Object... args) {
@@ -154,27 +182,22 @@ public class Channel extends AppCompatActivity{
                         JSONObject data = (JSONObject) args[0];
                         String total_users;
                         String new_user;
-                        String channelId;
                         String action;
                         try {
                             total_users = data.getString("total_users");
                             new_user = data.getString("new_user");
-                            channelId = data.getString("channelId");
                             action = data.getString("action");
                         } catch (JSONException e) {
                             return;
                         }
-                        if(channelId.equals(userChannelId)){
-                            Log.i("CHANNEL", channelId);
-                            if(action.equals("connection")){
-                                text_log.setText(String.format("%s %s", new_user, getResources().getString(R.string.has_joined)));
-                            }else{
-                                text_log.setText(String.format("%s %s", new_user, getResources().getString(R.string.has_left)));
-                            }
-                            text_users.setText(String.format("%s %s", getResources().getString(R.string.connected_users), total_users));
-                            text_status.setText(getResources().getString(R.string.online));
-                            color_status.setColor(getResources().getColor(R.color.online));
+                        if(action.equals("connection")){
+                            text_log.setText(String.format("%s %s", new_user, getResources().getString(R.string.has_joined)));
+                        }else{
+                            text_log.setText(String.format("%s %s", new_user, getResources().getString(R.string.has_left)));
                         }
+                        text_users.setText(String.format("%s %s", getResources().getString(R.string.connected_users), total_users));
+                        text_status.setText(getResources().getString(R.string.online));
+                        color_status.setColor(getResources().getColor(R.color.online));
                     }
                 });
             }
@@ -203,37 +226,6 @@ public class Channel extends AppCompatActivity{
                 });
             }
         });
-    }
-
-    private void viewInjection(){
-        imgUserPic = findViewById(R.id.imgUserPic);
-        text_status = findViewById(R.id.text_status);
-        text_users = findViewById(R.id.text_users);
-        text_log = findViewById(R.id.text_log);
-
-        circle_status = findViewById(R.id.circle_status);
-        color_status = (GradientDrawable)circle_status.getBackground();
-
-        record_audio = findViewById(R.id.record_audio);
-        bgShape = (GradientDrawable)record_audio.getBackground();
-
-        color_status.setColor(getResources().getColor(R.color.offline));
-
-    }
-
-    private void connect(){
-        try {
-            IO.Options opts = new IO.Options();
-            opts.query = "name=" + getIntent().getStringExtra("NAME");
-            opts.query += "&picture=" + getIntent().getStringExtra("PICTURE");
-            opts.query += "&id=" + getIntent().getStringExtra("ID");
-            opts.query += "&channelId=" + userChannelId;
-            mSocket = IO.socket("https://juanwalkie.herokuapp.com", opts);
-        } catch (URISyntaxException e) {
-            Log.w("ERROR CONNECT SOCKET", "onCreate: mSocket", e);
-        }
-
-        mSocket.connect();
     }
 
     private void startRecording(TextView text_log){
@@ -347,17 +339,6 @@ public class Channel extends AppCompatActivity{
         }
     }
 
-    private void returnMainActivity(){
-        disconnect();
-        MainActivity.signOut();
-        finish();
-    }
-
-    private void disconnect(){
-        mSocket.disconnect();
-        notificationManager.cancel(notificationID);
-    }
-
     private void setNotification(){
         Intent resultIntent = new Intent(this, Channel.class);
 
@@ -392,12 +373,6 @@ public class Channel extends AppCompatActivity{
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        disconnect();
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.main_menu, menu);
@@ -408,7 +383,6 @@ public class Channel extends AppCompatActivity{
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.sign_off_action:
-                //returnMainActivity();
                 signOffDialog.show();
                 return true;
 
@@ -470,9 +444,9 @@ public class Channel extends AppCompatActivity{
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 String channelName = addChannelInput.getText().toString();
-                Log.i("addc",channelName);
+                Log.i("ADD_CHANNEL_NAME", channelName);
                 if(!channelName.isEmpty()){
-
+                    setChannel(channelName);
                 }else{
                     Toast.makeText(getApplicationContext(), "You need to set a name",Toast.LENGTH_SHORT).show();
                 }
@@ -501,11 +475,9 @@ public class Channel extends AppCompatActivity{
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 String channelToken = chChannelInput.getText().toString();
-                Log.i("addc",channelToken);
+                Log.i("CHANGE_CHANNEL_ID",channelToken);
                 if(!channelToken.isEmpty()){
-
-                    //handle the operation with API, BROKO
-
+//                    changeChannel(channelToken);
                 }else{
                     Toast.makeText(getApplicationContext(), "You need to set the channel's id",Toast.LENGTH_SHORT).show();
                 }
@@ -520,6 +492,28 @@ public class Channel extends AppCompatActivity{
         });
 
         changeChannelDialog = builder.create();
+    }
+
+    private void returnMainActivity(){
+        disconnect();
+        MainActivity.signOut();
+        finish();
+    }
+
+    private void disconnect(){
+        mSocket.disconnect();
+        notificationManager.cancel(notificationID);
+    }
+
+    private void setChannel(String channel){
+        setTitle(channel);
+        mSocket.emit("SET_CHANNEL", channel);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        disconnect();
     }
 
     /*

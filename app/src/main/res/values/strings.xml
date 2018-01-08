@@ -19,6 +19,7 @@
     <string name="cancel">Cancel</string>
 
     <!-- Strings public channel -->
+    <string name="public_channel">Public channel</string>
     <string name="has_joined">has joined</string>
     <string name="has_left">has left</string>
     <string name="connected_users">Connected users:</string>
