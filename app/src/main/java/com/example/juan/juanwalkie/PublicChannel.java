@@ -287,7 +287,7 @@ public class PublicChannel extends AppCompatActivity{
             }
             mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 public void onCompletion(MediaPlayer mp) {
-                    text_log.setText("Tap to talk");
+                    text_log.setText("Hold down to talk");
                     mPlayer.release();
                     mPlayer = null;
                     imgUserPic.setVisibility(View.INVISIBLE);
