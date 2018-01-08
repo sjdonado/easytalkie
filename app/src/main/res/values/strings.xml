@@ -10,7 +10,7 @@
     <string name="dialog_signoff_title">Sign off</string>
     <string name="dialog_signoff_description">Are you sure?</string>
     <string name="dialog_joinchannel_title">Add a channel</string>
-    <string name="dialog_joinchannel_hint">#example</string>
+    <string name="dialog_joinchannel_hint">#channelname</string>
 
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
