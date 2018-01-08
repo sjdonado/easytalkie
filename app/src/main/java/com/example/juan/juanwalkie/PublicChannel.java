@@ -44,6 +44,8 @@ import java.util.Date;
 
 public class PublicChannel extends AppCompatActivity{
 
+    private static final String publicChannelId = "jja296y2ewd949ld803qvwqblm4y46t5s";
+    private static final String publicChannelName = "Public channel";
     private final int notificationID = 5;
     private String userChannelId;
 
@@ -74,8 +76,8 @@ public class PublicChannel extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_public_channel);
 
-        userChannelId = "jja296y2ewd949ld803qvwqblm4y46t5s";
-        setTitle("Public channel");
+        userChannelId = publicChannelId;
+        setTitle(publicChannelName);
 
         connect();
 
@@ -114,7 +116,7 @@ public class PublicChannel extends AppCompatActivity{
                         stop_recording.start();
                         imgUserPic.setVisibility(View.INVISIBLE);
                         bgShape.setColor(getResources().getColor(R.color.colorPrimary));
-                        text_log.setText("Hold down to talk");
+                        text_log.setText(getResources().getString(R.string.hold_down_to_talk));
                         vibrator.vibrate(50);
                         return true;
                     default:
@@ -145,12 +147,12 @@ public class PublicChannel extends AppCompatActivity{
                         if(channelId.equals(userChannelId)){
                             Log.i("CHANNEL", channelId);
                             if(action.equals("connection")){
-                                text_log.setText(new_user + " has joined");
+                                text_log.setText(String.format("%s %s", new_user, getResources().getString(R.string.has_joined)));
                             }else{
-                                text_log.setText(new_user + " has left");
+                                text_log.setText(String.format("%s %s", new_user, getResources().getString(R.string.has_left)));
                             }
-                            text_users.setText("Connected users: " + total_users);
-                            text_status.setText("Online");
+                            text_users.setText(String.format("%s %s", getResources().getString(R.string.connected_users), total_users));
+                            text_status.setText(getResources().getString(R.string.online));
                             color_status.setColor(getResources().getColor(R.color.online));
                         }
                     }
@@ -176,7 +178,6 @@ public class PublicChannel extends AppCompatActivity{
                             startPlaying(audioBase64, text_log, user_pic, user_name);
                         } catch (JSONException e) {
                             Log.w("ERROR", "run: getAUDIO", e);
-                            return;
                         }
                     }
                 });
@@ -225,7 +226,7 @@ public class PublicChannel extends AppCompatActivity{
     private void startRecording(TextView text_log){
         if(mPlayer == null || !mPlayer.isPlaying()){
             setTalkerImg(getIntent().getStringExtra("PICTURE"));
-            text_log.setText("You're talking");
+            text_log.setText(getResources().getString(R.string.you_are_talking));
         }
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -243,7 +244,7 @@ public class PublicChannel extends AppCompatActivity{
 
     private void stopRecording() {
         if(mPlayer == null || !mPlayer.isPlaying()){
-            text_log.setText("Hold down to talk");
+            text_log.setText(getResources().getString(R.string.hold_down_to_talk));
             imgUserPic.setVisibility(View.INVISIBLE);
         }
         mRecorder.stop();
@@ -267,7 +268,7 @@ public class PublicChannel extends AppCompatActivity{
 
     private void initStartPlaying(String audioBase64, TextView text_log, String user_pic, String user_name){
         writeToFile(audioBase64, mInputFile);
-        text_log.setText(user_name + " is talking");
+        text_log.setText(String.format("%s %s", user_name, getResources().getString(R.string.is_talking)));
         setTalkerImg(user_pic);
     }
 
@@ -294,7 +295,7 @@ public class PublicChannel extends AppCompatActivity{
             mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 public void onCompletion(MediaPlayer mp) {
                     if(mRecorder == null){
-                        text_log.setText("Hold down to talk");
+                        text_log.setText(getResources().getString(R.string.hold_down_to_talk));
                         imgUserPic.setVisibility(View.INVISIBLE);
                     }
                     mPlayer.release();
@@ -328,8 +329,6 @@ public class PublicChannel extends AppCompatActivity{
             out = new FileOutputStream(fileName);
             out.write(data);
             out.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -353,8 +352,8 @@ public class PublicChannel extends AppCompatActivity{
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this, "com.juan.status_notification")
                         .setSmallIcon(R.drawable.ic_walkie_notification)
-                        .setContentTitle(getIntent().getStringExtra("NAME").split(" ")[0] + ", you're online")
-                        .setContentText("Tap to more options.")
+                        .setContentTitle(String.format("%s%s", getIntent().getStringExtra("NAME").split(" ")[0], getResources().getString(R.string.you_are_online)))
+                        .setContentText(getResources().getString(R.string.tap_to_more_options))
                         .setOngoing(true)
                         .setContentIntent(resultPendingIntent);
         notificationManager.notify(notificationID, mBuilder.build());
