@@ -384,7 +384,7 @@ public class Channel extends AppCompatActivity{
                 return true;
 
             case R.id.join_channel_action:
-
+                joinChannelInput.setText("");
                 joinChannelDialog.show();
                 return true;
 
@@ -428,8 +428,10 @@ public class Channel extends AppCompatActivity{
         builder.setTitle(R.string.dialog_joinchannel_title);
 
         LayoutInflater inflater = getLayoutInflater();
-        builder.setView(inflater.inflate(R.layout.joinchannel_layout, null));
-        joinChannelInput = findViewById(R.id.txtJoinChannel);
+        View view = inflater.inflate(R.layout.joinchannel_layout, null);
+        builder.setView(view);
+
+        joinChannelInput = view.findViewById(R.id.txtJoinChannel);
 
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
