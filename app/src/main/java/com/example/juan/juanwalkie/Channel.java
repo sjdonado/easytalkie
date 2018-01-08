@@ -160,7 +160,7 @@ public class Channel extends AppCompatActivity{
             opts.query = "name=" + getIntent().getStringExtra("NAME");
             opts.query += "&picture=" + getIntent().getStringExtra("PICTURE");
             opts.query += "&id=" + getIntent().getStringExtra("ID");
-            mSocket = IO.socket("http://192.168.1.18:3000", opts);
+            mSocket = IO.socket("https://juanwalkie.herokuapp.com", opts);
         } catch (URISyntaxException e) {
             Log.w("ERROR CONNECT SOCKET", "onCreate: mSocket", e);
         }
