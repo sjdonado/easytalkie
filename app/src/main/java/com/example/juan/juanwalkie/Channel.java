@@ -393,7 +393,6 @@ public class Channel extends AppCompatActivity{
                 return true;
 
             case R.id.about_us_action:
-                Log.i("A","about us");
                 return true;
 
             default:
