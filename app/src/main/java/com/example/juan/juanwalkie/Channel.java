@@ -538,7 +538,7 @@ public class Channel extends AppCompatActivity{
             joinChannelLayout.setError(getResources().getString(R.string.joinchannel_empty_string_error));
             return false;
         }
-        if(!channelName.matches("[a-zA-Z0-9\\#]*")){
+        if(!channelName.substring(1).matches("[a-zA-Z0-9]*")){
             joinChannelLayout.setError(getResources().getString(R.string.joinchannel_badname_error));
             return false;
         }
