@@ -7,15 +7,20 @@
     <string name="sign_off_action_text">Sign Off</string>
     <string name="join_channel_action_text">Join Channel</string>
     <string name="about_us_action_text">Info</string>
+
+    <!-- Strings about modals -->
     <string name="dialog_signoff_title">Sign off</string>
     <string name="dialog_signoff_description">Are you sure?</string>
     <string name="dialog_joinchannel_title">Add a channel</string>
     <string name="dialog_joinchannel_hint">#channelname</string>
-
+    <string name="joinchannel_hashtag_error">You should add \'#\' before the name</string>
+    <string name="joinchannel_badname_error">The name can\'t contains spaces or symbols</string>
+    <string name="joinchannel_capital_letter_error">You\'ve to use capital letter</string>
+    <string name="joinchannel_empty_string_error">You need to set a name</string>
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
 
-    <!-- Strings pubactivity_channelnnel -->
+    <!-- Strings public_activity_channel -->
     <string name="public_channel">Public channel</string>
     <string name="has_joined">has joined</string>
     <string name="has_left">has left</string>
@@ -24,9 +29,8 @@
     <string name="hold_down_to_talk">Hold down to talk</string>
     <string name="you_are_talking">You\'re talking</string>
     <string name="is_talking">is talking</string>
-    <string name="you_are_online">, you\'re online</string>
+    <string name="you_are_online">, youThe\'re online</string>
     <string name="tap_to_more_options">Tap to more options.</string>
-
     <string name="pref_header_general">General</string>
 
     <string name="pref_title_social_recommendations">Enable social recommendations</string>

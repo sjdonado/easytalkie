@@ -29,6 +29,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -433,28 +434,44 @@ public class Channel extends AppCompatActivity{
 
         joinChannelInput = view.findViewById(R.id.txtJoinChannel);
 
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+        builder.setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                String channelName = joinChannelInput.getText().toString();
-                Log.i("ADD_CHANNEL_NAME", channelName);
-                if(!channelName.isEmpty()){
-                    setChannel(channelName);
-                }else{
-                    Toast.makeText(getApplicationContext(), "You need to set a name",Toast.LENGTH_SHORT).show();
-                }
-
+            String channelName = joinChannelInput.getText().toString();
+            Log.i("ADD_CHANNEL_NAME", channelName);
+            if(joinChannelInputVerifications(channelName)){
+                setChannel(channelName);
+                joinChannelDialog.dismiss();
+            }
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 // User cancelled the dialog
-
             }
         });
 
         joinChannelDialog = builder.create();
     }
+/*
+    joinChannelDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+        @Override
+        public void onShow(DialogInterface dialogInterface) {
+            Button button = ((AlertDialog) joinChannelDialog).getButton(AlertDialog.BUTTON_POSITIVE);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //Dismiss once everything is OK.
+                    String channelName = joinChannelInput.getText().toString();
+                    if(joinChannelInputVerifications(channelName)){
+                        setChannel(channelName);
+                        joinChannelDialog.dismiss();
+                    }
 
+                }
+            });
+        }
+    });
+*/
     private void returnMainActivity(){
         disconnect();
         MainActivity.signOut();
@@ -475,6 +492,24 @@ public class Channel extends AppCompatActivity{
     public void onDestroy() {
         super.onDestroy();
         disconnect();
+    }
+
+    private void sendToast(String message){
+        Toast.makeText(this,message,Toast.LENGTH_SHORT).show();
+    }
+
+    private boolean joinChannelInputVerifications(String channelName){
+        if(channelName.isEmpty()){sendToast(getResources().getString(R.string.joinchannel_empty_string_error)); return false;}
+        if(!channelName.matches("[a-zA-Z0-9\\#]*")){
+            sendToast(getResources().getString(R.string.joinchannel_badname_error));
+            return false;
+        }
+        if(channelName.charAt(0) == '#'){sendToast(getResources().getString(R.string.joinchannel_hashtag_error)); return false;}
+        if(!Character.isUpperCase(channelName.charAt(1))){
+            sendToast(getResources().getString(R.string.joinchannel_capital_letter_error));
+            return false;
+        }
+        return true;
     }
 
     /*
