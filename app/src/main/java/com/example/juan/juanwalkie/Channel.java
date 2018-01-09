@@ -13,6 +13,7 @@ import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
@@ -29,6 +30,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -80,6 +82,7 @@ public class Channel extends AppCompatActivity{
     private AlertDialog joinChannelDialog;
     private AlertDialog.Builder builder;
     private TextInputEditText joinChannelInput;
+    private TextInputLayout joinChannelLayout;
 
     private ImageView imgUserPic;
     private Socket mSocket;
@@ -385,7 +388,7 @@ public class Channel extends AppCompatActivity{
                 return true;
 
             case R.id.join_channel_action:
-                joinChannelInput.setText("");
+                cleanJoinChannelInput();
                 joinChannelDialog.show();
                 return true;
 
@@ -398,6 +401,11 @@ public class Channel extends AppCompatActivity{
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void cleanJoinChannelInput() {
+        joinChannelInput.setText("");
+        joinChannelLayout.setError(null);
     }
 
     private void setModals(){
@@ -433,15 +441,11 @@ public class Channel extends AppCompatActivity{
         builder.setView(view);
 
         joinChannelInput = view.findViewById(R.id.txtJoinChannel);
+        joinChannelLayout = view.findViewById(R.id.txtJoinChannelLayout);
 
-        builder.setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-            String channelName = joinChannelInput.getText().toString();
-            Log.i("ADD_CHANNEL_NAME", channelName);
-            if(joinChannelInputVerifications(channelName)){
-                setChannel(channelName);
-                joinChannelDialog.dismiss();
-            }
+
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -451,7 +455,31 @@ public class Channel extends AppCompatActivity{
         });
 
         joinChannelDialog = builder.create();
+        joinChannelDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+
+            @Override
+            public void onShow(DialogInterface dialog) {
+
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(joinChannelInput, InputMethodManager.SHOW_IMPLICIT);
+
+                Button b = joinChannelDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                b.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        String channelName = joinChannelInput.getText().toString();
+                        Log.i("ADD_CHANNEL_NAME", channelName);
+                        if(joinChannelInputVerifications(channelName)){
+                            setChannel(channelName);
+                            joinChannelDialog.dismiss();
+                        }
+                    }
+                });
+            }
+        });
     }
+
 /*
     joinChannelDialog.setOnShowListener(new DialogInterface.OnShowListener() {
         @Override
@@ -494,19 +522,25 @@ public class Channel extends AppCompatActivity{
         disconnect();
     }
 
-    private void sendToast(String message){
+    private void sendToastMessage(String message){
         Toast.makeText(this,message,Toast.LENGTH_SHORT).show();
     }
 
     private boolean joinChannelInputVerifications(String channelName){
-        if(channelName.isEmpty()){sendToast(getResources().getString(R.string.joinchannel_empty_string_error)); return false;}
-        if(!channelName.matches("[a-zA-Z0-9\\#]*")){
-            sendToast(getResources().getString(R.string.joinchannel_badname_error));
+        if(channelName.isEmpty()){
+            joinChannelLayout.setError(getResources().getString(R.string.joinchannel_empty_string_error));
             return false;
         }
-        if(channelName.charAt(0) == '#'){sendToast(getResources().getString(R.string.joinchannel_hashtag_error)); return false;}
+        if(channelName.charAt(0) != '#'){
+            joinChannelLayout.setError(getResources().getString(R.string.joinchannel_hashtag_error));
+            return false;
+        }
+        if(!channelName.matches("[a-zA-Z0-9\\#]*")){
+            joinChannelLayout.setError(getResources().getString(R.string.joinchannel_badname_error));
+            return false;
+        }
         if(!Character.isUpperCase(channelName.charAt(1))){
-            sendToast(getResources().getString(R.string.joinchannel_capital_letter_error));
+            joinChannelLayout.setError(getResources().getString(R.string.joinchannel_capital_letter_error));
             return false;
         }
         return true;
