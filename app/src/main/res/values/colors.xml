@@ -12,4 +12,6 @@
     <color name="colorRecord">#D32F2F</color>
     <color name="online">#8BC34A</color>
     <color name="offline">#F44336</color>
+
+    <color name="black_overlay">#66000000</color>
 </resources>
