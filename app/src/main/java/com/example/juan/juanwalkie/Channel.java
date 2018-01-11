@@ -24,6 +24,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Base64;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -394,6 +395,7 @@ public class Channel extends AppCompatActivity{
                 return true;
 
             case R.id.about_us_action:
+                startAboutUsActivity();
                 return true;
 
             default:
@@ -401,6 +403,11 @@ public class Channel extends AppCompatActivity{
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void startAboutUsActivity() {
+        Intent i = new Intent(this, AboutUs.class);
+        startActivity(i);
     }
 
     private void cleanJoinChannelInput() {
@@ -549,6 +556,21 @@ public class Channel extends AppCompatActivity{
         }
         return true;
     }
+
+    //Minimize the app when the back key is pressed
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)){ minimizeApp(); }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    public void minimizeApp() {
+        Intent startMain = new Intent(Intent.ACTION_MAIN);
+        startMain.addCategory(Intent.CATEGORY_HOME);
+        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(startMain);
+    }
+
 
     /*
     private void isConnect(){
