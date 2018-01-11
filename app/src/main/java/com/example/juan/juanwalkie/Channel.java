@@ -92,6 +92,8 @@ public class Channel extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_channel);
 
+        connect();
+
         beep_sound = MediaPlayer.create(this, R.raw.radio_beep);
         stop_recording = MediaPlayer.create(this, R.raw.stop_recording);
 //        error_sound = MediaPlayer.create(this, R.raw.error_sound);
@@ -104,7 +106,6 @@ public class Channel extends AppCompatActivity{
         inputAudioQueue = new ArrayList();
 
         viewInjection();
-        connect();
         setNotification();
     }
 
