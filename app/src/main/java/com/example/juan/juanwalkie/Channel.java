@@ -394,6 +394,7 @@ public class Channel extends AppCompatActivity{
                 return true;
 
             case R.id.about_us_action:
+                startAboutUsActivity();
                 return true;
 
             default:
@@ -401,6 +402,11 @@ public class Channel extends AppCompatActivity{
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void startAboutUsActivity() {
+        Intent i = new Intent(this, AboutUs.class);
+        startActivity(i);
     }
 
     private void cleanJoinChannelInput() {
@@ -550,11 +556,10 @@ public class Channel extends AppCompatActivity{
         return true;
     }
 
+    //Minimize the app when the back key is pressed
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            minimizeApp();
-        }
+        if ((keyCode == KeyEvent.KEYCODE_BACK)){ minimizeApp(); }
         return super.onKeyDown(keyCode, event);
     }
 

@@ -106,4 +106,7 @@
     <string name="title_activity_about_us">AboutUs</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+
+    <!-- About Us -->
+    <string name="aboutus_title">Info</string>
 </resources>

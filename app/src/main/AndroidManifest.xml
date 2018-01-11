@@ -24,11 +24,7 @@
         <activity
             android:name=".Channel"
             android:launchMode="singleTask" />
-        <activity
-            android:name=".AboutUs"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/title_activity_about_us"
-            android:theme="@style/FullscreenTheme"></activity>
+        <activity android:name=".AboutUs"></activity>
     </application>
 
 </manifest>
