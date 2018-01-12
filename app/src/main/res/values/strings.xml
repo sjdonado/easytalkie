@@ -109,4 +109,11 @@
 
     <!-- About Us -->
     <string name="aboutus_title">Info</string>
+    <string name="aboutus_info_ico">Information</string>
+    <string name="brian_name">Brian Ramirez</string>
+    <string name="brian_mail">brianramirez482@gmail.com</string>
+    <string name="juan_name">Juan Rodriguez</string>
+    <string name="juan_mail">jsr98@gmail.com</string>
+    <string name="return_button">Return</string>
+    <string name="developers">DEVELOPERS</string>
 </resources>
