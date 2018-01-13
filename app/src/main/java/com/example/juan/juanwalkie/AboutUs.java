@@ -22,7 +22,5 @@ public class AboutUs extends AppCompatActivity {
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
-    public void returnButton(View view){
-        finish();
-    }
+    public void returnButton(View view){finish();}
 }
