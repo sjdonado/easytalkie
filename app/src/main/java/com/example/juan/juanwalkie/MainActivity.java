@@ -89,7 +89,9 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(getBaseContext(), Channel.class);
             intent.putExtra("ID", account.getId());
             intent.putExtra("NAME", account.getDisplayName());
-            intent.putExtra("PICTURE", account.getPhotoUrl().toString().replace("96","140"));
+            String urlPhoto = (account.getPhotoUrl()!=null) ?
+                    account.getPhotoUrl().toString().replace("96","140") : "" ;
+            intent.putExtra("PICTURE", urlPhoto);
             startActivity(intent);
         }
     }

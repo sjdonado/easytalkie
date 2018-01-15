@@ -45,30 +45,32 @@
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:background="@android:color/darker_gray"
-            app:layout_constraintBottom_toTopOf="@+id/imageView4"
+            app:layout_constraintBottom_toTopOf="@+id/imgJuan"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
         <ImageView
-            android:id="@+id/imageView4"
+            android:id="@+id/imgJuan"
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:layout_marginStart="32dp"
             android:layout_marginTop="50dp"
+            android:scaleType="centerInside"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView2"
-            app:srcCompat="@mipmap/juan_profile_pic_round" />
+            app:srcCompat="@drawable/juan_profile_pic" />
 
         <ImageView
-            android:id="@+id/imageView5"
+            android:id="@+id/imgBrian"
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:layout_marginStart="32dp"
             android:layout_marginTop="24dp"
+            android:scaleType="centerInside"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView4"
-            app:srcCompat="@mipmap/brian_profile_pic_round" />
+            app:layout_constraintTop_toBottomOf="@+id/imgJuan"
+            app:srcCompat="@drawable/brian_profile_pic" />
 
         <Button
             android:id="@+id/button2"
@@ -109,8 +111,8 @@
             android:textSize="22sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.02"
-            app:layout_constraintStart_toEndOf="@+id/imageView4"
-            app:layout_constraintTop_toTopOf="@+id/imageView4" />
+            app:layout_constraintStart_toEndOf="@+id/imgJuan"
+            app:layout_constraintTop_toTopOf="@+id/imgJuan" />
 
         <TextView
             android:id="@+id/textView4"
@@ -121,7 +123,7 @@
             android:text="@string/juan_mail"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.02"
-            app:layout_constraintStart_toEndOf="@+id/imageView4"
+            app:layout_constraintStart_toEndOf="@+id/imgJuan"
             app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
         <TextView
@@ -135,8 +137,8 @@
             android:textSize="22sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.02"
-            app:layout_constraintStart_toEndOf="@+id/imageView5"
-            app:layout_constraintTop_toTopOf="@+id/imageView5" />
+            app:layout_constraintStart_toEndOf="@+id/imgBrian"
+            app:layout_constraintTop_toTopOf="@+id/imgBrian" />
 
         <TextView
             android:id="@+id/textView6"
@@ -147,7 +149,7 @@
             android:text="@string/brian_mail"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.04"
-            app:layout_constraintStart_toEndOf="@+id/imageView5"
+            app:layout_constraintStart_toEndOf="@+id/imgBrian"
             app:layout_constraintTop_toBottomOf="@+id/textView5" />
     </android.support.constraint.ConstraintLayout>
 
