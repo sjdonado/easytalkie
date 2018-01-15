@@ -51,7 +51,7 @@ public class AboutUs extends AppCompatActivity {
                 getResources().getResourceEntryName(drawableId) );
     }
 
-    // set the picuter on a circular way
+    // set the picture on a circular way
     private void setDeveloperPicture(Uri uri, ImageView imgView){
         final ImageView imageView = imgView;
         Picasso.with(this).load(uri)

@@ -1,7 +1,9 @@
 package com.example.juan.juanwalkie;
 
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -90,7 +92,8 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra("ID", account.getId());
             intent.putExtra("NAME", account.getDisplayName());
             String urlPhoto = (account.getPhotoUrl()!=null) ?
-                    account.getPhotoUrl().toString().replace("96","140") : "" ;
+                    account.getPhotoUrl().toString().replace("96","140") :
+                    getLocalDrawableUri(R.drawable.ic_account_circle_green_20dp).toString() ;
             intent.putExtra("PICTURE", urlPhoto);
             startActivity(intent);
         }
@@ -120,4 +123,11 @@ public class MainActivity extends AppCompatActivity {
         mGoogleSignInClient.signOut();
     }
 
+    //get local URI of local drawable
+    private Uri getLocalDrawableUri(int drawableId){
+        return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE +
+                "://" + getResources().getResourcePackageName(drawableId)
+                + '/' + getResources().getResourceTypeName(drawableId) + '/' +
+                getResources().getResourceEntryName(drawableId) );
+    }
 }
