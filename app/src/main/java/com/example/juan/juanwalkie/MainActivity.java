@@ -12,12 +12,21 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
+
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,8 +35,12 @@ public class MainActivity extends AppCompatActivity {
     private static boolean global_permissions = false;
     public static GoogleSignInClient mGoogleSignInClient;
 
+    private LoginButton fbButton;
+    private CallbackManager callbackManager;
+
     @Override
     protected void onStart() {
+        getSupportActionBar().hide();
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         updateUI(account);
         super.onStart();
@@ -56,6 +69,36 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        AppEventsLogger.activateApp(this);
+
+        viewInjection();
+
+        callbackManager = CallbackManager.Factory.create();
+
+        // Callback registration
+        fbButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                loginResult.
+            }
+
+            @Override
+            public void onCancel() {
+                // App code
+            }
+
+            @Override
+            public void onError(FacebookException exception) {
+                // App code
+            }
+        });
+    }
+
+    private void viewInjection(){
+        fbButton = (LoginButton) findViewById(R.id.facebook_button);
+        fbButton.setReadPermissions("email", "public_profile");
     }
 
     @Override
@@ -69,6 +112,8 @@ public class MainActivity extends AppCompatActivity {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
         }
+
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
@@ -123,7 +168,8 @@ public class MainActivity extends AppCompatActivity {
         mGoogleSignInClient.signOut();
     }
 
-    //get local URI of local drawable
+    //geta URI of local drawable
+    //geta URI of local drawable
     private Uri getLocalDrawableUri(int drawableId){
         return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE +
                 "://" + getResources().getResourcePackageName(drawableId)

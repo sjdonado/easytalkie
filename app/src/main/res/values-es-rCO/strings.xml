@@ -39,4 +39,9 @@
     <string name="offline">desconectado</string>
     <string name="connected_users_zero">Usuarios conectados: 0</string>
     <string name="pref_header_general">General</string>
+    <string name="title_activity_about_us">Sobre Nosotros</string>
+    <string name="aboutus_title">Info</string>
+    <string name="aboutus_info_ico">Información</string>
+    <string name="return_button">Regresar</string>
+    <string name="developers">DESARROLLADORES</string>
 </resources>

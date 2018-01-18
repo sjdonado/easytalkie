@@ -104,16 +104,19 @@
     <string name="pref_title_vibrate">Vibrate</string>
 
     <string name="title_activity_about_us">AboutUs</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
 
     <!-- About Us -->
     <string name="aboutus_title">Info</string>
     <string name="aboutus_info_ico">Information</string>
-    <string name="brian_name">Brian Ramirez</string>
-    <string name="brian_mail">brianramirez482@gmail.com</string>
-    <string name="juan_name">Juan Rodriguez</string>
-    <string name="juan_mail">jsr98@gmail.com</string>
+    <string name="brian_name" translatable="false">Brian Ramirez</string>
+    <string name="brian_mail" translatable="false">brianramirez482@gmail.com</string>
+    <string name="juan_name" translatable="false">Juan Rodriguez</string>
+    <string name="juan_mail" translatable="false">jsrd98@gmail.com</string>
     <string name="return_button">Return</string>
     <string name="developers">DEVELOPERS</string>
+
+    <!-- Login Activity -->
+    <string name="login_message">You have to login</string>
+    <string name="facebook_app_id">201820097064809</string>
+    <string name="fb_login_protocol_scheme">fb201820097064809</string>
 </resources>
