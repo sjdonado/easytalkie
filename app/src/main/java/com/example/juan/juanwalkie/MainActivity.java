@@ -9,12 +9,17 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -27,6 +32,9 @@ import com.google.android.gms.tasks.Task;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,11 +46,12 @@ public class MainActivity extends AppCompatActivity {
     private LoginButton fbButton;
     private CallbackManager callbackManager;
 
+    private final String FACEBOOK_USER_PIC_URL = "https://graph.facebook.com/userid/picture?type=large";
+
     @Override
     protected void onStart() {
         getSupportActionBar().hide();
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        updateUI(account);
+        updateUI();
         super.onStart();
     }
 
@@ -81,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         fbButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                loginResult.
+                handleFacebookLogin(loginResult.getAccessToken());
             }
 
             @Override
@@ -119,10 +128,10 @@ public class MainActivity extends AppCompatActivity {
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            updateUI(account);
+            handleGoogleLogin(account);
         } catch (ApiException e) {
             Toast.makeText(this, "signInResult:failed code=" + e.getStatusCode(), Toast.LENGTH_LONG).show();
-            updateUI(null);
+            handleGoogleLogin(null);
         }
     }
 
@@ -131,7 +140,15 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
-    private void updateUI(GoogleSignInAccount account){
+    private void updateUI(){
+        if(GoogleSignIn.getLastSignedInAccount(this)!=null){
+            handleGoogleLogin(GoogleSignIn.getLastSignedInAccount(this));
+        }else if (AccessToken.getCurrentAccessToken()!=null){
+            handleFacebookLogin(AccessToken.getCurrentAccessToken());
+        }
+    }
+
+    private void handleGoogleLogin(GoogleSignInAccount account){
         if(account != null){
             Intent intent = new Intent(getBaseContext(), Channel.class);
             intent.putExtra("ID", account.getId());
@@ -142,6 +159,39 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra("PICTURE", urlPhoto);
             startActivity(intent);
         }
+    }
+
+    private void handleFacebookLogin(final AccessToken token){
+        if(token!=null){
+            GraphRequest request = GraphRequest.newMeRequest(
+                    token,
+                    new GraphRequest.GraphJSONObjectCallback() {
+                        @Override
+                        public void onCompleted(
+                                JSONObject object,
+                                GraphResponse response) {
+                            try {
+
+                                String name = response.getJSONObject().getString("first_name")
+                                        +" "+ response.getJSONObject().getString("last_name");
+                                Intent intent = new Intent(getBaseContext(), Channel.class);
+                                intent.putExtra("ID", token.getUserId());
+                                intent.putExtra("NAME", name);
+                                intent.putExtra("PICTURE",FACEBOOK_USER_PIC_URL.replace(
+                                        "userid",token.getUserId()));
+                                startActivity(intent);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    });
+            Bundle parameters = new Bundle();
+            parameters.putString("fields", "first_name,last_name");
+            request.setParameters(parameters);
+            request.executeAsync();
+        }
+
     }
 
     private void requestPermissions() {
@@ -165,11 +215,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static void signOut() {
-        mGoogleSignInClient.signOut();
+        if(AccessToken.getCurrentAccessToken()!=null){
+            LoginManager.getInstance().logOut();
+        }else{
+            mGoogleSignInClient.signOut();
+        }
     }
 
-    //geta URI of local drawable
-    //geta URI of local drawable
+    //get an URI of local drawable
     private Uri getLocalDrawableUri(int drawableId){
         return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE +
                 "://" + getResources().getResourcePackageName(drawableId)
