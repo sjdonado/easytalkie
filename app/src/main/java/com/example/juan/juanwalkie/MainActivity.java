@@ -1,6 +1,8 @@
 package com.example.juan.juanwalkie;
 
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -90,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         fbButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                handleFacebookLogin(loginResult.getAccessToken());
+                handleFacebookLogin(AccessToken.getCurrentAccessToken());
             }
 
             @Override
@@ -99,8 +101,9 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onError(FacebookException exception) {
-                // App code
+            public void onError(FacebookException e) {
+                Toast.makeText(getApplicationContext(), "signInResult:failed code=" +
+                        e.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -109,6 +112,25 @@ public class MainActivity extends AppCompatActivity {
         fbButton = (LoginButton) findViewById(R.id.facebook_button);
         fbButton.setReadPermissions("email", "public_profile");
     }
+/*
+    private void handleFacebookLoginProgress(final Context context,final Runnable runnable) {
+        final ProgressDialog ringProgressDialog = ProgressDialog.show(context, "Title ...", "Info ...", true);
+        //you usually don't want the user to stop the current process, and this will make sure of that
+        ringProgressDialog.setCancelable(false);
+        Thread th = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                runnable.run();
+                //after he logic is done, close the progress dialog
+                Log.i("s","ss");
+                handleFacebookLogin(AccessToken.getCurrentAccessToken());
+                Log.i("s","ss1");
+                ringProgressDialog.dismiss();
+            }
+        });
+        th.start();
+    }
+    */
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
