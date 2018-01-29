@@ -213,7 +213,6 @@ public class MainActivity extends AppCompatActivity {
             request.setParameters(parameters);
             request.executeAsync();
         }
-
     }
 
     private void requestPermissions() {
